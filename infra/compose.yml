@@ -1,0 +1,186 @@
+# Docker Compose for Video Intelligence Platform
+# GPU reservation ensures exclusive GPU access for worker
+
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------
+  # API Service (CPU-bound)
+  # ---------------------------------------------------------
+  api:
+    build:
+      context: ../
+      dockerfile: infra/docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - MINIO_ENDPOINT=minio:9000
+      - MILVUS_HOST=milvus
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - temp_data:/app/temp   # <-- shared temp volume
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # Worker Service (GPU-bound)
+  # ---------------------------------------------------------
+  worker:
+    build:
+      context: ../
+      dockerfile: infra/docker/Dockerfile.worker
+    environment:
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - MINIO_ENDPOINT=minio:9000
+      - MILVUS_HOST=milvus
+      - OLLAMA_HOST=http://ollama:11434
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - temp_data:/app/temp       # <-- required for GPU interlock
+      - models_cache:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vip_user
+      POSTGRES_PASSWORD: vip_password
+      POSTGRES_DB: video_intelligence
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vip_user -d video_intelligence"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # Redis Cache & Celery Queue Backend
+  # ---------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # MinIO Object Storage
+  # ---------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # Milvus Vector Database
+  # ---------------------------------------------------------
+  milvus:
+    image: milvusdb/milvus:v2.4.0
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_USE_EMBED: "true"
+      ETCD_DATA_DIR: /var/lib/milvus/etcd
+      COMMON_STORAGETYPE: local
+    volumes:
+      - milvus_data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------
+  # Ollama LLM Service (GPU-bound)
+  # ---------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+      - temp_data:/app/temp     # ← FIX: required for interlock GPU sharing
+    ports:
+      - "11434:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - vip-network
+    restart: unless-stopped
+
+# ---------------------------------------------------------
+# Persistent Volumes
+# ---------------------------------------------------------
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  milvus_data:
+  ollama_data:
+  temp_data:      # Shared by API, worker, and Ollama
+  models_cache:
+
+# ---------------------------------------------------------
+# Networks
+# ---------------------------------------------------------
+networks:
+  vip-network:
+    driver: bridge

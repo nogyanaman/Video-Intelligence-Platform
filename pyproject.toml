@@ -1,0 +1,80 @@
+[project]
+name = "video-intelligence-platform"
+version = "1.0.0"
+description = "Local Video Intelligence Platform with GPU-constrained processing"
+requires-python = ">=3.10"
+authors = [
+    {name = "VIP Team", email = "team@vip.local"}
+]
+
+[project.dependencies]
+dependencies = [
+    # Web Framework
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.9",
+    
+    # Database
+    "sqlalchemy[asyncio]>=2.0.25",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.1",
+    
+    # Task Queue
+    "celery[redis]>=5.3.6",
+    "redis>=5.0.1",
+    
+    # Storage
+    "minio>=7.2.3",
+    
+    # Vector Database
+    "pymilvus>=2.4.0",
+    
+    # AI/ML
+    "torch>=2.3.0",
+    "torchaudio>=2.3.0",
+    "torchvision>=0.18.0",
+    "faster-whisper>=1.0.0",
+    "ultralytics>=8.1.0",
+    "sentence-transformers>=2.5.0",
+    "transformers>=4.38.0",
+    "open-clip-torch>=2.24.0",
+    
+    # Utilities
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "httpx>=0.27.0",
+    "filelock>=3.13.1",
+    "pynvml>=11.5.0",
+    "python-dotenv>=1.0.1",
+    "structlog>=24.1.0",
+    "tenacity>=8.2.3",
+    "numpy>=1.26.0",
+    "pillow>=10.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "black>=24.1.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true

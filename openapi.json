@@ -1,0 +1,1179 @@
+﻿{
+    "openapi":  "3.1.0",
+    "info":  {
+                 "title":  "video-intelligence-platform",
+                 "description":  "Local Video Intelligence Platform - GPU-constrained video analysis",
+                 "version":  "1.0.0"
+             },
+    "paths":  {
+                  "/health":  {
+                                  "get":  {
+                                              "tags":  [
+                                                           "health"
+                                                       ],
+                                              "summary":  "Health Check",
+                                              "description":  "Health check endpoint.\n\nReturns system status including GPU information.",
+                                              "operationId":  "health_check_health_get",
+                                              "responses":  {
+                                                                "200":  {
+                                                                            "description":  "Successful Response",
+                                                                            "content":  {
+                                                                                            "application/json":  {
+                                                                                                                     "schema":  {
+                                                                                                                                    "$ref":  "#/components/schemas/HealthResponse"
+                                                                                                                                }
+                                                                                                                 }
+                                                                                        }
+                                                                        }
+                                                            }
+                                          }
+                              },
+                  "/health/gpu":  {
+                                      "get":  {
+                                                  "tags":  [
+                                                               "health"
+                                                           ],
+                                                  "summary":  "Gpu Status",
+                                                  "description":  "Detailed GPU status endpoint.\n\nReturns comprehensive VRAM and GPU information.",
+                                                  "operationId":  "gpu_status_health_gpu_get",
+                                                  "responses":  {
+                                                                    "200":  {
+                                                                                "description":  "Successful Response",
+                                                                                "content":  {
+                                                                                                "application/json":  {
+                                                                                                                         "schema":  {
+                                                                                                                                        "$ref":  "#/components/schemas/GPUStatusResponse"
+                                                                                                                                    }
+                                                                                                                     }
+                                                                                            }
+                                                                            }
+                                                                }
+                                              }
+                                  },
+                  "/health/gpu/cleanup":  {
+                                              "post":  {
+                                                           "tags":  [
+                                                                        "health"
+                                                                    ],
+                                                           "summary":  "Force Gpu Cleanup",
+                                                           "description":  "Force GPU cleanup.\n\nTriggers aggressive garbage collection and CUDA cache clearing.",
+                                                           "operationId":  "force_gpu_cleanup_health_gpu_cleanup_post",
+                                                           "responses":  {
+                                                                             "200":  {
+                                                                                         "description":  "Successful Response",
+                                                                                         "content":  {
+                                                                                                         "application/json":  {
+                                                                                                                                  "schema":  {
+                                                                                                                                                 "additionalProperties":  true,
+                                                                                                                                                 "type":  "object",
+                                                                                                                                                 "title":  "Response Force Gpu Cleanup Health Gpu Cleanup Post"
+                                                                                                                                             }
+                                                                                                                              }
+                                                                                                     }
+                                                                                     }
+                                                                         }
+                                                       }
+                                          },
+                  "/videos":  {
+                                  "post":  {
+                                               "tags":  [
+                                                            "videos"
+                                                        ],
+                                               "summary":  "Upload Video",
+                                               "description":  "Upload a video for processing.\n\nAccepts video files up to 500MB and 10 minutes duration.\nProcessing happens asynchronously.",
+                                               "operationId":  "upload_video_videos_post",
+                                               "requestBody":  {
+                                                                   "required":  true,
+                                                                   "content":  {
+                                                                                   "multipart/form-data":  {
+                                                                                                               "schema":  {
+                                                                                                                              "$ref":  "#/components/schemas/Body_upload_video_videos_post"
+                                                                                                                          }
+                                                                                                           }
+                                                                               }
+                                                               },
+                                               "responses":  {
+                                                                 "202":  {
+                                                                             "description":  "Successful Response",
+                                                                             "content":  {
+                                                                                             "application/json":  {
+                                                                                                                      "schema":  {
+                                                                                                                                     "$ref":  "#/components/schemas/VideoUploadResponse"
+                                                                                                                                 }
+                                                                                                                  }
+                                                                                         }
+                                                                         },
+                                                                 "422":  {
+                                                                             "description":  "Validation Error",
+                                                                             "content":  {
+                                                                                             "application/json":  {
+                                                                                                                      "schema":  {
+                                                                                                                                     "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                 }
+                                                                                                                  }
+                                                                                         }
+                                                                         }
+                                                             }
+                                           },
+                                  "get":  {
+                                              "tags":  [
+                                                           "videos"
+                                                       ],
+                                              "summary":  "List Videos",
+                                              "description":  "List all videos with pagination.",
+                                              "operationId":  "list_videos_videos_get",
+                                              "parameters":  [
+                                                                 {
+                                                                     "name":  "skip",
+                                                                     "in":  "query",
+                                                                     "required":  false,
+                                                                     "schema":  {
+                                                                                    "type":  "integer",
+                                                                                    "minimum":  0,
+                                                                                    "default":  0,
+                                                                                    "title":  "Skip"
+                                                                                }
+                                                                 },
+                                                                 {
+                                                                     "name":  "limit",
+                                                                     "in":  "query",
+                                                                     "required":  false,
+                                                                     "schema":  {
+                                                                                    "type":  "integer",
+                                                                                    "maximum":  100,
+                                                                                    "minimum":  1,
+                                                                                    "default":  20,
+                                                                                    "title":  "Limit"
+                                                                                }
+                                                                 }
+                                                             ],
+                                              "responses":  {
+                                                                "200":  {
+                                                                            "description":  "Successful Response",
+                                                                            "content":  {
+                                                                                            "application/json":  {
+                                                                                                                     "schema":  {
+                                                                                                                                    "$ref":  "#/components/schemas/VideoListResponse"
+                                                                                                                                }
+                                                                                                                 }
+                                                                                        }
+                                                                        },
+                                                                "422":  {
+                                                                            "description":  "Validation Error",
+                                                                            "content":  {
+                                                                                            "application/json":  {
+                                                                                                                     "schema":  {
+                                                                                                                                    "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                }
+                                                                                                                 }
+                                                                                        }
+                                                                        }
+                                                            }
+                                          }
+                              },
+                  "/videos/{video_id}":  {
+                                             "get":  {
+                                                         "tags":  [
+                                                                      "videos"
+                                                                  ],
+                                                         "summary":  "Get Video",
+                                                         "description":  "Get video details by ID.",
+                                                         "operationId":  "get_video_videos__video_id__get",
+                                                         "parameters":  [
+                                                                            {
+                                                                                "name":  "video_id",
+                                                                                "in":  "path",
+                                                                                "required":  true,
+                                                                                "schema":  {
+                                                                                               "type":  "string",
+                                                                                               "format":  "uuid",
+                                                                                               "title":  "Video Id"
+                                                                                           }
+                                                                            }
+                                                                        ],
+                                                         "responses":  {
+                                                                           "200":  {
+                                                                                       "description":  "Successful Response",
+                                                                                       "content":  {
+                                                                                                       "application/json":  {
+                                                                                                                                "schema":  {
+                                                                                                                                               "$ref":  "#/components/schemas/VideoResponse"
+                                                                                                                                           }
+                                                                                                                            }
+                                                                                                   }
+                                                                                   },
+                                                                           "422":  {
+                                                                                       "description":  "Validation Error",
+                                                                                       "content":  {
+                                                                                                       "application/json":  {
+                                                                                                                                "schema":  {
+                                                                                                                                               "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                           }
+                                                                                                                            }
+                                                                                                   }
+                                                                                   }
+                                                                       }
+                                                     },
+                                             "delete":  {
+                                                            "tags":  [
+                                                                         "videos"
+                                                                     ],
+                                                            "summary":  "Delete Video",
+                                                            "description":  "Delete a video and all associated data.",
+                                                            "operationId":  "delete_video_videos__video_id__delete",
+                                                            "parameters":  [
+                                                                               {
+                                                                                   "name":  "video_id",
+                                                                                   "in":  "path",
+                                                                                   "required":  true,
+                                                                                   "schema":  {
+                                                                                                  "type":  "string",
+                                                                                                  "format":  "uuid",
+                                                                                                  "title":  "Video Id"
+                                                                                              }
+                                                                               }
+                                                                           ],
+                                                            "responses":  {
+                                                                              "204":  {
+                                                                                          "description":  "Successful Response"
+                                                                                      },
+                                                                              "422":  {
+                                                                                          "description":  "Validation Error",
+                                                                                          "content":  {
+                                                                                                          "application/json":  {
+                                                                                                                                   "schema":  {
+                                                                                                                                                  "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                              }
+                                                                                                                               }
+                                                                                                      }
+                                                                                      }
+                                                                          }
+                                                        }
+                                         },
+                  "/videos/{video_id}/jobs":  {
+                                                  "get":  {
+                                                              "tags":  [
+                                                                           "videos"
+                                                                       ],
+                                                              "summary":  "Get Video Jobs",
+                                                              "description":  "Get all processing jobs for a video.",
+                                                              "operationId":  "get_video_jobs_videos__video_id__jobs_get",
+                                                              "parameters":  [
+                                                                                 {
+                                                                                     "name":  "video_id",
+                                                                                     "in":  "path",
+                                                                                     "required":  true,
+                                                                                     "schema":  {
+                                                                                                    "type":  "string",
+                                                                                                    "format":  "uuid",
+                                                                                                    "title":  "Video Id"
+                                                                                                }
+                                                                                 }
+                                                                             ],
+                                                              "responses":  {
+                                                                                "200":  {
+                                                                                            "description":  "Successful Response",
+                                                                                            "content":  {
+                                                                                                            "application/json":  {
+                                                                                                                                     "schema":  {
+                                                                                                                                                    "type":  "array",
+                                                                                                                                                    "items":  {
+                                                                                                                                                                  "$ref":  "#/components/schemas/JobResponse"
+                                                                                                                                                              },
+                                                                                                                                                    "title":  "Response Get Video Jobs Videos  Video Id  Jobs Get"
+                                                                                                                                                }
+                                                                                                                                 }
+                                                                                                        }
+                                                                                        },
+                                                                                "422":  {
+                                                                                            "description":  "Validation Error",
+                                                                                            "content":  {
+                                                                                                            "application/json":  {
+                                                                                                                                     "schema":  {
+                                                                                                                                                    "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                                }
+                                                                                                                                 }
+                                                                                                        }
+                                                                                        }
+                                                                            }
+                                                          }
+                                              },
+                  "/videos/{video_id}/transcript":  {
+                                                        "get":  {
+                                                                    "tags":  [
+                                                                                 "videos"
+                                                                             ],
+                                                                    "summary":  "Get Video Transcript",
+                                                                    "description":  "Get video transcript.",
+                                                                    "operationId":  "get_video_transcript_videos__video_id__transcript_get",
+                                                                    "parameters":  [
+                                                                                       {
+                                                                                           "name":  "video_id",
+                                                                                           "in":  "path",
+                                                                                           "required":  true,
+                                                                                           "schema":  {
+                                                                                                          "type":  "string",
+                                                                                                          "format":  "uuid",
+                                                                                                          "title":  "Video Id"
+                                                                                                      }
+                                                                                       }
+                                                                                   ],
+                                                                    "responses":  {
+                                                                                      "200":  {
+                                                                                                  "description":  "Successful Response",
+                                                                                                  "content":  {
+                                                                                                                  "application/json":  {
+                                                                                                                                           "schema":  {
+                                                                                                                                                          "$ref":  "#/components/schemas/TranscriptResponse"
+                                                                                                                                                      }
+                                                                                                                                       }
+                                                                                                              }
+                                                                                              },
+                                                                                      "422":  {
+                                                                                                  "description":  "Validation Error",
+                                                                                                  "content":  {
+                                                                                                                  "application/json":  {
+                                                                                                                                           "schema":  {
+                                                                                                                                                          "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                                      }
+                                                                                                                                       }
+                                                                                                              }
+                                                                                              }
+                                                                                  }
+                                                                }
+                                                    },
+                  "/videos/{video_id}/detections":  {
+                                                        "get":  {
+                                                                    "tags":  [
+                                                                                 "videos"
+                                                                             ],
+                                                                    "summary":  "Get Video Detections",
+                                                                    "description":  "Get object detection results.",
+                                                                    "operationId":  "get_video_detections_videos__video_id__detections_get",
+                                                                    "parameters":  [
+                                                                                       {
+                                                                                           "name":  "video_id",
+                                                                                           "in":  "path",
+                                                                                           "required":  true,
+                                                                                           "schema":  {
+                                                                                                          "type":  "string",
+                                                                                                          "format":  "uuid",
+                                                                                                          "title":  "Video Id"
+                                                                                                      }
+                                                                                       }
+                                                                                   ],
+                                                                    "responses":  {
+                                                                                      "200":  {
+                                                                                                  "description":  "Successful Response",
+                                                                                                  "content":  {
+                                                                                                                  "application/json":  {
+                                                                                                                                           "schema":  {
+                                                                                                                                                          "$ref":  "#/components/schemas/ObjectDetectionResponse"
+                                                                                                                                                      }
+                                                                                                                                       }
+                                                                                                              }
+                                                                                              },
+                                                                                      "422":  {
+                                                                                                  "description":  "Validation Error",
+                                                                                                  "content":  {
+                                                                                                                  "application/json":  {
+                                                                                                                                           "schema":  {
+                                                                                                                                                          "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                                      }
+                                                                                                                                       }
+                                                                                                              }
+                                                                                              }
+                                                                                  }
+                                                                }
+                                                    },
+                  "/queries":  {
+                                   "post":  {
+                                                "tags":  [
+                                                             "queries"
+                                                         ],
+                                                "summary":  "Query Videos",
+                                                "description":  "Query video content using natural language.",
+                                                "operationId":  "query_videos_queries_post",
+                                                "requestBody":  {
+                                                                    "content":  {
+                                                                                    "application/json":  {
+                                                                                                             "schema":  {
+                                                                                                                            "$ref":  "#/components/schemas/QueryRequest"
+                                                                                                                        }
+                                                                                                         }
+                                                                                },
+                                                                    "required":  true
+                                                                },
+                                                "responses":  {
+                                                                  "200":  {
+                                                                              "description":  "Successful Response",
+                                                                              "content":  {
+                                                                                              "application/json":  {
+                                                                                                                       "schema":  {
+                                                                                                                                      "$ref":  "#/components/schemas/QueryResponse"
+                                                                                                                                  }
+                                                                                                                   }
+                                                                                          }
+                                                                          },
+                                                                  "422":  {
+                                                                              "description":  "Validation Error",
+                                                                              "content":  {
+                                                                                              "application/json":  {
+                                                                                                                       "schema":  {
+                                                                                                                                      "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                  }
+                                                                                                                   }
+                                                                                          }
+                                                                          }
+                                                              }
+                                            }
+                               },
+                  "/queries/search":  {
+                                          "get":  {
+                                                      "tags":  [
+                                                                   "queries"
+                                                               ],
+                                                      "summary":  "Search Transcripts",
+                                                      "description":  "Search video transcripts directly.",
+                                                      "operationId":  "search_transcripts_queries_search_get",
+                                                      "parameters":  [
+                                                                         {
+                                                                             "name":  "q",
+                                                                             "in":  "query",
+                                                                             "required":  true,
+                                                                             "schema":  {
+                                                                                            "type":  "string",
+                                                                                            "title":  "Q"
+                                                                                        }
+                                                                         },
+                                                                         {
+                                                                             "name":  "video_id",
+                                                                             "in":  "query",
+                                                                             "required":  false,
+                                                                             "schema":  {
+                                                                                            "anyOf":  [
+                                                                                                          {
+                                                                                                              "type":  "string",
+                                                                                                              "format":  "uuid"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "type":  "null"
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "title":  "Video Id"
+                                                                                        }
+                                                                         },
+                                                                         {
+                                                                             "name":  "limit",
+                                                                             "in":  "query",
+                                                                             "required":  false,
+                                                                             "schema":  {
+                                                                                            "type":  "integer",
+                                                                                            "default":  10,
+                                                                                            "title":  "Limit"
+                                                                                        }
+                                                                         }
+                                                                     ],
+                                                      "responses":  {
+                                                                        "200":  {
+                                                                                    "description":  "Successful Response",
+                                                                                    "content":  {
+                                                                                                    "application/json":  {
+                                                                                                                             "schema":  {
+                                                                                                                                            "type":  "object",
+                                                                                                                                            "additionalProperties":  true,
+                                                                                                                                            "title":  "Response Search Transcripts Queries Search Get"
+                                                                                                                                        }
+                                                                                                                         }
+                                                                                                }
+                                                                                },
+                                                                        "422":  {
+                                                                                    "description":  "Validation Error",
+                                                                                    "content":  {
+                                                                                                    "application/json":  {
+                                                                                                                             "schema":  {
+                                                                                                                                            "$ref":  "#/components/schemas/HTTPValidationError"
+                                                                                                                                        }
+                                                                                                                         }
+                                                                                                }
+                                                                                }
+                                                                    }
+                                                  }
+                                      },
+                  "/":  {
+                            "get":  {
+                                        "summary":  "Root",
+                                        "description":  "Root endpoint.",
+                                        "operationId":  "root__get",
+                                        "responses":  {
+                                                          "200":  {
+                                                                      "description":  "Successful Response",
+                                                                      "content":  {
+                                                                                      "application/json":  {
+                                                                                                               "schema":  {
+                                                                                                                              "additionalProperties":  true,
+                                                                                                                              "type":  "object",
+                                                                                                                              "title":  "Response Root  Get"
+                                                                                                                          }
+                                                                                                           }
+                                                                                  }
+                                                                  }
+                                                      }
+                                    }
+                        }
+              },
+    "components":  {
+                       "schemas":  {
+                                       "Body_upload_video_videos_post":  {
+                                                                             "properties":  {
+                                                                                                "file":  {
+                                                                                                             "type":  "string",
+                                                                                                             "format":  "binary",
+                                                                                                             "title":  "File",
+                                                                                                             "description":  "Video file to upload"
+                                                                                                         }
+                                                                                            },
+                                                                             "type":  "object",
+                                                                             "required":  [
+                                                                                              "file"
+                                                                                          ],
+                                                                             "title":  "Body_upload_video_videos_post"
+                                                                         },
+                                       "DetectionResult":  {
+                                                               "properties":  {
+                                                                                  "frame_number":  {
+                                                                                                       "type":  "integer",
+                                                                                                       "title":  "Frame Number"
+                                                                                                   },
+                                                                                  "timestamp_ms":  {
+                                                                                                       "type":  "integer",
+                                                                                                       "title":  "Timestamp Ms"
+                                                                                                   },
+                                                                                  "detections":  {
+                                                                                                     "items":  {
+                                                                                                                   "additionalProperties":  true,
+                                                                                                                   "type":  "object"
+                                                                                                               },
+                                                                                                     "type":  "array",
+                                                                                                     "title":  "Detections"
+                                                                                                 }
+                                                                              },
+                                                               "type":  "object",
+                                                               "required":  [
+                                                                                "frame_number",
+                                                                                "timestamp_ms",
+                                                                                "detections"
+                                                                            ],
+                                                               "title":  "DetectionResult"
+                                                           },
+                                       "GPUStatusResponse":  {
+                                                                 "properties":  {
+                                                                                    "used_gb":  {
+                                                                                                    "type":  "number",
+                                                                                                    "title":  "Used Gb"
+                                                                                                },
+                                                                                    "total_gb":  {
+                                                                                                     "type":  "number",
+                                                                                                     "title":  "Total Gb"
+                                                                                                 },
+                                                                                    "free_gb":  {
+                                                                                                    "type":  "number",
+                                                                                                    "title":  "Free Gb"
+                                                                                                },
+                                                                                    "state":  {
+                                                                                                  "type":  "string",
+                                                                                                  "title":  "State"
+                                                                                              },
+                                                                                    "utilization_percent":  {
+                                                                                                                "type":  "number",
+                                                                                                                "title":  "Utilization Percent"
+                                                                                                            },
+                                                                                    "current_model":  {
+                                                                                                          "anyOf":  [
+                                                                                                                        {
+                                                                                                                            "type":  "string"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "type":  "null"
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                          "title":  "Current Model"
+                                                                                                      },
+                                                                                    "is_locked":  {
+                                                                                                      "type":  "boolean",
+                                                                                                      "title":  "Is Locked"
+                                                                                                  }
+                                                                                },
+                                                                 "type":  "object",
+                                                                 "required":  [
+                                                                                  "used_gb",
+                                                                                  "total_gb",
+                                                                                  "free_gb",
+                                                                                  "state",
+                                                                                  "utilization_percent",
+                                                                                  "is_locked"
+                                                                              ],
+                                                                 "title":  "GPUStatusResponse"
+                                                             },
+                                       "HTTPValidationError":  {
+                                                                   "properties":  {
+                                                                                      "detail":  {
+                                                                                                     "items":  {
+                                                                                                                   "$ref":  "#/components/schemas/ValidationError"
+                                                                                                               },
+                                                                                                     "type":  "array",
+                                                                                                     "title":  "Detail"
+                                                                                                 }
+                                                                                  },
+                                                                   "type":  "object",
+                                                                   "title":  "HTTPValidationError"
+                                                               },
+                                       "HealthResponse":  {
+                                                              "properties":  {
+                                                                                 "status":  {
+                                                                                                "type":  "string",
+                                                                                                "title":  "Status"
+                                                                                            },
+                                                                                 "version":  {
+                                                                                                 "type":  "string",
+                                                                                                 "title":  "Version"
+                                                                                             },
+                                                                                 "gpu_available":  {
+                                                                                                       "type":  "boolean",
+                                                                                                       "title":  "Gpu Available"
+                                                                                                   },
+                                                                                 "vram_used_gb":  {
+                                                                                                      "type":  "number",
+                                                                                                      "title":  "Vram Used Gb"
+                                                                                                  },
+                                                                                 "vram_total_gb":  {
+                                                                                                       "type":  "number",
+                                                                                                       "title":  "Vram Total Gb"
+                                                                                                   },
+                                                                                 "vram_state":  {
+                                                                                                    "type":  "string",
+                                                                                                    "title":  "Vram State"
+                                                                                                }
+                                                                             },
+                                                              "type":  "object",
+                                                              "required":  [
+                                                                               "status",
+                                                                               "version",
+                                                                               "gpu_available",
+                                                                               "vram_used_gb",
+                                                                               "vram_total_gb",
+                                                                               "vram_state"
+                                                                           ],
+                                                              "title":  "HealthResponse"
+                                                          },
+                                       "JobResponse":  {
+                                                           "properties":  {
+                                                                              "id":  {
+                                                                                         "type":  "string",
+                                                                                         "format":  "uuid",
+                                                                                         "title":  "Id"
+                                                                                     },
+                                                                              "video_id":  {
+                                                                                               "type":  "string",
+                                                                                               "format":  "uuid",
+                                                                                               "title":  "Video Id"
+                                                                                           },
+                                                                              "stage":  {
+                                                                                            "$ref":  "#/components/schemas/JobStageEnum"
+                                                                                        },
+                                                                              "status":  {
+                                                                                             "$ref":  "#/components/schemas/JobStatusEnum"
+                                                                                         },
+                                                                              "error_log":  {
+                                                                                                "anyOf":  [
+                                                                                                              {
+                                                                                                                  "type":  "string"
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "type":  "null"
+                                                                                                              }
+                                                                                                          ],
+                                                                                                "title":  "Error Log"
+                                                                                            },
+                                                                              "created_at":  {
+                                                                                                 "type":  "string",
+                                                                                                 "format":  "date-time",
+                                                                                                 "title":  "Created At"
+                                                                                             },
+                                                                              "started_at":  {
+                                                                                                 "anyOf":  [
+                                                                                                               {
+                                                                                                                   "type":  "string",
+                                                                                                                   "format":  "date-time"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "type":  "null"
+                                                                                                               }
+                                                                                                           ],
+                                                                                                 "title":  "Started At"
+                                                                                             },
+                                                                              "completed_at":  {
+                                                                                                   "anyOf":  [
+                                                                                                                 {
+                                                                                                                     "type":  "string",
+                                                                                                                     "format":  "date-time"
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "type":  "null"
+                                                                                                                 }
+                                                                                                             ],
+                                                                                                   "title":  "Completed At"
+                                                                                               }
+                                                                          },
+                                                           "type":  "object",
+                                                           "required":  [
+                                                                            "id",
+                                                                            "video_id",
+                                                                            "stage",
+                                                                            "status",
+                                                                            "created_at"
+                                                                        ],
+                                                           "title":  "JobResponse"
+                                                       },
+                                       "JobStageEnum":  {
+                                                            "type":  "string",
+                                                            "enum":  [
+                                                                         "ingest",
+                                                                         "normalization",
+                                                                         "audio_intelligence",
+                                                                         "visual_intelligence",
+                                                                         "indexing"
+                                                                     ],
+                                                            "title":  "JobStageEnum"
+                                                        },
+                                       "JobStatusEnum":  {
+                                                             "type":  "string",
+                                                             "enum":  [
+                                                                          "pending",
+                                                                          "running",
+                                                                          "completed",
+                                                                          "failed"
+                                                                      ],
+                                                             "title":  "JobStatusEnum"
+                                                         },
+                                       "ObjectDetectionResponse":  {
+                                                                       "properties":  {
+                                                                                          "frames":  {
+                                                                                                         "items":  {
+                                                                                                                       "$ref":  "#/components/schemas/DetectionResult"
+                                                                                                                   },
+                                                                                                         "type":  "array",
+                                                                                                         "title":  "Frames"
+                                                                                                     },
+                                                                                          "unique_objects":  {
+                                                                                                                 "additionalProperties":  {
+                                                                                                                                              "type":  "integer"
+                                                                                                                                          },
+                                                                                                                 "type":  "object",
+                                                                                                                 "title":  "Unique Objects"
+                                                                                                             }
+                                                                                      },
+                                                                       "type":  "object",
+                                                                       "required":  [
+                                                                                        "frames",
+                                                                                        "unique_objects"
+                                                                                    ],
+                                                                       "title":  "ObjectDetectionResponse"
+                                                                   },
+                                       "QueryRequest":  {
+                                                            "properties":  {
+                                                                               "query":  {
+                                                                                             "type":  "string",
+                                                                                             "maxLength":  1000,
+                                                                                             "minLength":  1,
+                                                                                             "title":  "Query"
+                                                                                         },
+                                                                               "video_id":  {
+                                                                                                "anyOf":  [
+                                                                                                              {
+                                                                                                                  "type":  "string",
+                                                                                                                  "format":  "uuid"
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "type":  "null"
+                                                                                                              }
+                                                                                                          ],
+                                                                                                "title":  "Video Id"
+                                                                                            }
+                                                                           },
+                                                            "type":  "object",
+                                                            "required":  [
+                                                                             "query"
+                                                                         ],
+                                                            "title":  "QueryRequest"
+                                                        },
+                                       "QueryResponse":  {
+                                                             "properties":  {
+                                                                                "answer":  {
+                                                                                               "type":  "string",
+                                                                                               "title":  "Answer"
+                                                                                           },
+                                                                                "sources":  {
+                                                                                                "items":  {
+                                                                                                              "$ref":  "#/components/schemas/QuerySource"
+                                                                                                          },
+                                                                                                "type":  "array",
+                                                                                                "title":  "Sources"
+                                                                                            },
+                                                                                "confidence":  {
+                                                                                                   "type":  "number",
+                                                                                                   "title":  "Confidence"
+                                                                                               },
+                                                                                "cached":  {
+                                                                                               "type":  "boolean",
+                                                                                               "title":  "Cached",
+                                                                                               "default":  false
+                                                                                           }
+                                                                            },
+                                                             "type":  "object",
+                                                             "required":  [
+                                                                              "answer",
+                                                                              "sources",
+                                                                              "confidence"
+                                                                          ],
+                                                             "title":  "QueryResponse"
+                                                         },
+                                       "QuerySource":  {
+                                                           "properties":  {
+                                                                              "video_id":  {
+                                                                                               "type":  "string",
+                                                                                               "title":  "Video Id"
+                                                                                           },
+                                                                              "text":  {
+                                                                                           "type":  "string",
+                                                                                           "title":  "Text"
+                                                                                       },
+                                                                              "start_ms":  {
+                                                                                               "type":  "integer",
+                                                                                               "title":  "Start Ms"
+                                                                                           },
+                                                                              "end_ms":  {
+                                                                                             "type":  "integer",
+                                                                                             "title":  "End Ms"
+                                                                                         },
+                                                                              "score":  {
+                                                                                            "type":  "number",
+                                                                                            "title":  "Score"
+                                                                                        }
+                                                                          },
+                                                           "type":  "object",
+                                                           "required":  [
+                                                                            "video_id",
+                                                                            "text",
+                                                                            "start_ms",
+                                                                            "end_ms",
+                                                                            "score"
+                                                                        ],
+                                                           "title":  "QuerySource"
+                                                       },
+                                       "TranscriptResponse":  {
+                                                                  "properties":  {
+                                                                                     "segments":  {
+                                                                                                      "items":  {
+                                                                                                                    "$ref":  "#/components/schemas/TranscriptSegment"
+                                                                                                                },
+                                                                                                      "type":  "array",
+                                                                                                      "title":  "Segments"
+                                                                                                  },
+                                                                                     "language":  {
+                                                                                                      "type":  "string",
+                                                                                                      "title":  "Language"
+                                                                                                  },
+                                                                                     "duration_ms":  {
+                                                                                                         "type":  "integer",
+                                                                                                         "title":  "Duration Ms"
+                                                                                                     }
+                                                                                 },
+                                                                  "type":  "object",
+                                                                  "required":  [
+                                                                                   "segments",
+                                                                                   "language",
+                                                                                   "duration_ms"
+                                                                               ],
+                                                                  "title":  "TranscriptResponse"
+                                                              },
+                                       "TranscriptSegment":  {
+                                                                 "properties":  {
+                                                                                    "start_ms":  {
+                                                                                                     "type":  "integer",
+                                                                                                     "title":  "Start Ms"
+                                                                                                 },
+                                                                                    "end_ms":  {
+                                                                                                   "type":  "integer",
+                                                                                                   "title":  "End Ms"
+                                                                                               },
+                                                                                    "text":  {
+                                                                                                 "type":  "string",
+                                                                                                 "title":  "Text"
+                                                                                             },
+                                                                                    "confidence":  {
+                                                                                                       "type":  "number",
+                                                                                                       "title":  "Confidence"
+                                                                                                   }
+                                                                                },
+                                                                 "type":  "object",
+                                                                 "required":  [
+                                                                                  "start_ms",
+                                                                                  "end_ms",
+                                                                                  "text",
+                                                                                  "confidence"
+                                                                              ],
+                                                                 "title":  "TranscriptSegment"
+                                                             },
+                                       "ValidationError":  {
+                                                               "properties":  {
+                                                                                  "loc":  {
+                                                                                              "items":  {
+                                                                                                            "anyOf":  [
+                                                                                                                          {
+                                                                                                                              "type":  "string"
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "type":  "integer"
+                                                                                                                          }
+                                                                                                                      ]
+                                                                                                        },
+                                                                                              "type":  "array",
+                                                                                              "title":  "Location"
+                                                                                          },
+                                                                                  "msg":  {
+                                                                                              "type":  "string",
+                                                                                              "title":  "Message"
+                                                                                          },
+                                                                                  "type":  {
+                                                                                               "type":  "string",
+                                                                                               "title":  "Error Type"
+                                                                                           }
+                                                                              },
+                                                               "type":  "object",
+                                                               "required":  [
+                                                                                "loc",
+                                                                                "msg",
+                                                                                "type"
+                                                                            ],
+                                                               "title":  "ValidationError"
+                                                           },
+                                       "VideoListResponse":  {
+                                                                 "properties":  {
+                                                                                    "videos":  {
+                                                                                                   "items":  {
+                                                                                                                 "$ref":  "#/components/schemas/VideoResponse"
+                                                                                                             },
+                                                                                                   "type":  "array",
+                                                                                                   "title":  "Videos"
+                                                                                               },
+                                                                                    "total":  {
+                                                                                                  "type":  "integer",
+                                                                                                  "title":  "Total"
+                                                                                              }
+                                                                                },
+                                                                 "type":  "object",
+                                                                 "required":  [
+                                                                                  "videos",
+                                                                                  "total"
+                                                                              ],
+                                                                 "title":  "VideoListResponse"
+                                                             },
+                                       "VideoMetadata":  {
+                                                             "properties":  {
+                                                                                "codec":  {
+                                                                                              "anyOf":  [
+                                                                                                            {
+                                                                                                                "type":  "string"
+                                                                                                            },
+                                                                                                            {
+                                                                                                                "type":  "null"
+                                                                                                            }
+                                                                                                        ],
+                                                                                              "title":  "Codec"
+                                                                                          },
+                                                                                "width":  {
+                                                                                              "anyOf":  [
+                                                                                                            {
+                                                                                                                "type":  "integer"
+                                                                                                            },
+                                                                                                            {
+                                                                                                                "type":  "null"
+                                                                                                            }
+                                                                                                        ],
+                                                                                              "title":  "Width"
+                                                                                          },
+                                                                                "height":  {
+                                                                                               "anyOf":  [
+                                                                                                             {
+                                                                                                                 "type":  "integer"
+                                                                                                             },
+                                                                                                             {
+                                                                                                                 "type":  "null"
+                                                                                                             }
+                                                                                                         ],
+                                                                                               "title":  "Height"
+                                                                                           },
+                                                                                "fps":  {
+                                                                                            "anyOf":  [
+                                                                                                          {
+                                                                                                              "type":  "number"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "type":  "null"
+                                                                                                          }
+                                                                                                      ],
+                                                                                            "title":  "Fps"
+                                                                                        },
+                                                                                "bitrate":  {
+                                                                                                "anyOf":  [
+                                                                                                              {
+                                                                                                                  "type":  "integer"
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "type":  "null"
+                                                                                                              }
+                                                                                                          ],
+                                                                                                "title":  "Bitrate"
+                                                                                            },
+                                                                                "duration_ms":  {
+                                                                                                    "anyOf":  [
+                                                                                                                  {
+                                                                                                                      "type":  "integer"
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                      "type":  "null"
+                                                                                                                  }
+                                                                                                              ],
+                                                                                                    "title":  "Duration Ms"
+                                                                                                },
+                                                                                "is_hdr":  {
+                                                                                               "anyOf":  [
+                                                                                                             {
+                                                                                                                 "type":  "boolean"
+                                                                                                             },
+                                                                                                             {
+                                                                                                                 "type":  "null"
+                                                                                                             }
+                                                                                                         ],
+                                                                                               "title":  "Is Hdr"
+                                                                                           }
+                                                                            },
+                                                             "type":  "object",
+                                                             "title":  "VideoMetadata"
+                                                         },
+                                       "VideoResponse":  {
+                                                             "properties":  {
+                                                                                "id":  {
+                                                                                           "type":  "string",
+                                                                                           "format":  "uuid",
+                                                                                           "title":  "Id"
+                                                                                       },
+                                                                                "user_id":  {
+                                                                                                "type":  "string",
+                                                                                                "format":  "uuid",
+                                                                                                "title":  "User Id"
+                                                                                            },
+                                                                                "status":  {
+                                                                                               "$ref":  "#/components/schemas/VideoStatusEnum"
+                                                                                           },
+                                                                                "original_filename":  {
+                                                                                                          "anyOf":  [
+                                                                                                                        {
+                                                                                                                            "type":  "string"
+                                                                                                                        },
+                                                                                                                        {
+                                                                                                                            "type":  "null"
+                                                                                                                        }
+                                                                                                                    ],
+                                                                                                          "title":  "Original Filename"
+                                                                                                      },
+                                                                                "file_size_bytes":  {
+                                                                                                        "anyOf":  [
+                                                                                                                      {
+                                                                                                                          "type":  "integer"
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                          "type":  "null"
+                                                                                                                      }
+                                                                                                                  ],
+                                                                                                        "title":  "File Size Bytes"
+                                                                                                    },
+                                                                                "duration_ms":  {
+                                                                                                    "anyOf":  [
+                                                                                                                  {
+                                                                                                                      "type":  "integer"
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                      "type":  "null"
+                                                                                                                  }
+                                                                                                              ],
+                                                                                                    "title":  "Duration Ms"
+                                                                                                },
+                                                                                "metadata":  {
+                                                                                                 "anyOf":  [
+                                                                                                               {
+                                                                                                                   "$ref":  "#/components/schemas/VideoMetadata"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "type":  "null"
+                                                                                                               }
+                                                                                                           ]
+                                                                                             },
+                                                                                "created_at":  {
+                                                                                                   "type":  "string",
+                                                                                                   "format":  "date-time",
+                                                                                                   "title":  "Created At"
+                                                                                               },
+                                                                                "updated_at":  {
+                                                                                                   "type":  "string",
+                                                                                                   "format":  "date-time",
+                                                                                                   "title":  "Updated At"
+                                                                                               }
+                                                                            },
+                                                             "type":  "object",
+                                                             "required":  [
+                                                                              "id",
+                                                                              "user_id",
+                                                                              "status",
+                                                                              "created_at",
+                                                                              "updated_at"
+                                                                          ],
+                                                             "title":  "VideoResponse"
+                                                         },
+                                       "VideoStatusEnum":  {
+                                                               "type":  "string",
+                                                               "enum":  [
+                                                                            "uploading",
+                                                                            "processing",
+                                                                            "ready",
+                                                                            "failed"
+                                                                        ],
+                                                               "title":  "VideoStatusEnum"
+                                                           },
+                                       "VideoUploadResponse":  {
+                                                                   "properties":  {
+                                                                                      "id":  {
+                                                                                                 "type":  "string",
+                                                                                                 "format":  "uuid",
+                                                                                                 "title":  "Id"
+                                                                                             },
+                                                                                      "status":  {
+                                                                                                     "$ref":  "#/components/schemas/VideoStatusEnum"
+                                                                                                 },
+                                                                                      "message":  {
+                                                                                                      "type":  "string",
+                                                                                                      "title":  "Message"
+                                                                                                  }
+                                                                                  },
+                                                                   "type":  "object",
+                                                                   "required":  [
+                                                                                    "id",
+                                                                                    "status",
+                                                                                    "message"
+                                                                                ],
+                                                                   "title":  "VideoUploadResponse"
+                                                               }
+                                   }
+                   }
+}

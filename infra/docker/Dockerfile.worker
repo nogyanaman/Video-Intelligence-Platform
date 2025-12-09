@@ -1,0 +1,78 @@
+# CUDA image for Worker Service with FFmpeg
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
+
+WORKDIR /app
+
+# Install system dependencies including FFmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3-pip \
+    python3.10-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libgl1-mesa-glx \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python aliases
+RUN ln -sf /usr/bin/python3.10 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
+
+# Upgrade pip
+RUN pip install --no-cache-dir pip --upgrade
+
+# Install PyTorch with CUDA support
+RUN pip install --no-cache-dir \
+    torch==2.3.0 \
+    torchvision==0.18.0 \
+    torchaudio==2.3.0 \
+    --index-url https://download.pytorch.org/whl/cu121
+
+# Install ML dependencies
+RUN pip install --no-cache-dir \
+    faster-whisper \
+    ultralytics \
+    sentence-transformers \
+    open-clip-torch \
+    transformers \
+    nvidia-cudnn-cu12==9.1.0.70 
+
+# Install other dependencies
+RUN pip install --no-cache-dir \
+    sqlalchemy[asyncio] \
+    asyncpg \
+    redis \
+    celery \
+    minio \
+    pymilvus \
+    pydantic \
+    pydantic-settings \
+    httpx \
+    filelock \
+    pynvml \
+    structlog \
+    tenacity \
+    pillow \
+    numpy
+
+# Copy application code
+COPY src/ ./src/
+
+# Create directories and user
+RUN useradd -m -u 1000 appuser && \
+    mkdir -p /app/temp /app/models && \
+    chown -R appuser:appuser /app
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV CUDA_VISIBLE_DEVICES=0
+
+# --- CRITICAL FIX: Link Python NVIDIA libs to System Path ---
+# This tells Linux exactly where to find the cuDNN 9 libraries installed by pip
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.10/dist-packages/nvidia/cudnn/lib:/usr/local/lib/python3.10/dist-packages/nvidia/cublas/lib:$LD_LIBRARY_PATH
+
+USER appuser
+
+# Run Celery worker with 'solo' pool to prevent CUDA multiprocessing crash
+CMD ["celery", "-A", "src.workers.tasks", "worker", "--loglevel=info", "--pool=solo"]

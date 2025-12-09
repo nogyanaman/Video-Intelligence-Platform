@@ -1,0 +1,38 @@
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Python files
+*.py text diff=python
+
+# Shell scripts (Unix line endings)
+*.sh text eol=lf
+
+# Windows batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Docker files
+Dockerfile text
+docker-compose.yml text
+
+# Markdown
+*.md text
+
+# JSON/YAML
+*.json text
+*.yml text
+*.yaml text
+
+# Binary files (don't modify)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.webm binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
