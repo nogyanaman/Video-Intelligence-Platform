@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Local Video Intelligence Platform with GPU-constrained processing"
 requires-python = ">=3.10"
 authors = [
-    {name = "VIP Team", email = "team@vip.local"}
+    {name = "Naman", email = "nogyanaman@gmail.com"}
 ]
 
 [project.dependencies]
