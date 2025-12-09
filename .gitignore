@@ -249,3 +249,5 @@ celerybeat.pid
 # GPU Lock file
 gpu.lock
 video_results/
+
+openapi.json
