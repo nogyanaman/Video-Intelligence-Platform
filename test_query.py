@@ -1,35 +1,31 @@
 import requests
 
-# Keep your existing Video ID
-VIDEO_ID = "..." 
+# Your Video ID
+VIDEO_ID = "4a92fb1e-d6c4-4f44-b07b-7f84d2d8ee43"
 API_URL = "http://localhost:8000"
 
-# --- CHANGE THIS QUERY ---
-# Old: "What happens in this video?"
-# New (Hindi): "इस शख्स ने क्या चुराया है?" (What did this person steal?)
-# Or try specific keywords: "Google aur Instagram par kya hai?"
-QUERY = "Summarize this." 
+print(f"🕵️‍♀️ Inspecting Video: {VIDEO_ID}")
 
-print(f"🧠 Asking AI about video {VIDEO_ID}...")
+# 1. Get the Video Metadata (This usually contains the full transcript)
+url = f"{API_URL}/videos/{VIDEO_ID}"
+response = requests.get(url)
 
-try:
-    response = requests.post(
-        f"{API_URL}/queries",
-        json={"query": QUERY, "video_id": VIDEO_ID}
-    )
-# ... rest of the script stays the same ...
-
-    if response.status_code == 200:
-        data = response.json()
-        print("\n" + "="*50)
-        print(f"🤖 AI Answer: {data['answer']}")
-        print(f"📊 Confidence: {data['confidence']}")
-        print("="*50)
-        print("\nSources used:")
-        for source in data['sources']:
-            print(f"- [{source['start_ms']}ms]: {source['text']}")
+if response.status_code == 200:
+    data = response.json()
+    print("\n✅ Video Found!")
+    print(f"Status: {data.get('status')}")
+    
+    # Check if transcript exists
+    transcript = data.get('transcript', [])
+    if transcript:
+        print(f"\n📝 Transcript Found ({len(transcript)} segments):")
+        print("-" * 40)
+        # Print the first 3 lines of what the AI actually heard
+        for seg in transcript[:5]: 
+            print(f"[{seg['start']}s]: {seg['text']}")
+        print("-" * 40)
+        print("Copy one of the lines above exactly and try searching for it.")
     else:
-        print(f"❌ Query failed: {response.text}")
-
-except Exception as e:
-    print(f"❌ Connection error: {e}")
+        print("\n❌ Transcript is empty in the database.")
+else:
+    print(f"\n❌ API Error: {response.status_code} - {response.text}")

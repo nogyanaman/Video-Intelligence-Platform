@@ -5,7 +5,7 @@ version: "3.8"
 
 services:
   # ---------------------------------------------------------
-  # API Service (CPU-bound)
+  # API Service (GPU required for model loading)
   # ---------------------------------------------------------
   api:
     build:
@@ -33,6 +33,15 @@ services:
     networks:
       - vip-network
     restart: unless-stopped
+
+    # 👇 ADDED BLOCK — REQUIRED FOR GPU ACCESS 👇
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   # ---------------------------------------------------------
   # Worker Service (GPU-bound)
